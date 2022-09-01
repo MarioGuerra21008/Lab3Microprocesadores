@@ -16,43 +16,47 @@
 #include <cstdint>
 using namespace std;
 
+struct {
+    double i;
+    double N;
+    double resultado;
+    double sumatoria;
+} listaVariables;
+
 void *serieNumeros(void *numeros){
-    int i;
-    int N;
-    int valorMax;
-    int resultado = 0;
-    int sumatoria = 0;
+    listaVariables.i = 0;
     long tid;
     tid = (long)numeros;
+    double valorMax;
     
     for(int i=0;i<valorMax;i++){
-        resultado = 3 / 2^(N);
-        cout<<"El resultado es: "<<resultado<<endl;
-        sumatoria += resultado;
-        N++;
-        if(N == valorMax){
-            cout<<"La sumatoria total es de: "<<sumatoria<<endl;
-            pthread_exit(NULL);
-        }
+        listaVariables.resultado = 1/(listaVariables.N * (listaVariables.N + 1));
+        cout<<"El resultado es: "<<listaVariables.resultado<<endl;
     }
     pthread_exit(NULL);
 }
 
 int main() {
-    int valorMax;
     pthread_t tid;
-    int i;
+    pthread_attr_t attr;
+    double valorMax;
+    listaVariables.i = 0;
+    listaVariables.N = 1;
     
     cout<<"Ingrese el valor máximo para su serie: "<<endl;
     cin>>valorMax;
     
     for(int i=0;i<valorMax;i++){
         pthread_create(&tid, NULL, serieNumeros, (void*)NULL);
-        
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE);
         pthread_join(tid,NULL);
-        if(i==valorMax){
-            pthread_exit(NULL);
+        listaVariables.N = listaVariables.N+1;
+        listaVariables.sumatoria += listaVariables.resultado;
+        if(listaVariables.N==(valorMax+1)){
+            cout<<"La sumatoria es: "<<listaVariables.sumatoria<<endl;
         }
     }
-    
+    pthread_attr_destroy(&attr);
+    pthread_exit(NULL);
 }
